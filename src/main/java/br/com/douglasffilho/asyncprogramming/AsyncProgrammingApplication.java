@@ -37,7 +37,7 @@ public class AsyncProgrammingApplication implements CommandLineRunner {
 
             pizza.getComponents().forEach(PizzaComponent::echo);
 
-            log.info("Pizza done in {}min", execTime/100);
+            log.info("Pizza done in {}min", execTime / 100);
         });
 
         System.exit(0);
