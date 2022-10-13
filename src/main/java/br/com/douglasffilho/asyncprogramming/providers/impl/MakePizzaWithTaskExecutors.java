@@ -7,14 +7,19 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 @Component
-@Profile("threads")
-public class MakePizzaWithThreads implements MakingPizzaProvider {
+@Profile("future")
+public class MakePizzaWithTaskExecutors implements MakingPizzaProvider {
+    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(3);
+
     private final List<MakingPizzaService> services;
 
-    public MakePizzaWithThreads(final List<MakingPizzaService> services) {
+    public MakePizzaWithTaskExecutors(final List<MakingPizzaService> services) {
         this.services = services;
     }
 
@@ -22,19 +27,19 @@ public class MakePizzaWithThreads implements MakingPizzaProvider {
     public Pizza makePizza() {
         final Pizza pizza = new Pizza();
 
-        final Stream<Thread> servicesThreads = this.services
+        final Stream<Future<Pizza>> tasks = this.services
                 .parallelStream()
-                .map(service -> new Thread(() -> service.addComponentToPizza(pizza)));
+                .map(service -> EXECUTOR.submit(() -> {
+                    service.addComponentToPizza(pizza);
+                    return pizza;
+                }));
 
-        return servicesThreads
-                .flatMap(thread -> {
-                    thread.start();
+        return tasks.flatMap(task -> {
                     try {
-                        thread.join();
-                    } catch (InterruptedException e) {
+                        return Stream.of(task.get());
+                    } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                    return Stream.of(pizza);
                 })
                 .findAny()
                 .orElse(pizza);
