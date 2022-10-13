@@ -17,6 +17,6 @@ public abstract class PizzaComponent {
     }
 
     public void echo() {
-        log.info("[{}] :: done in {}min", super.getClass().getSimpleName(), this.makingTime/10);
+        log.info("[{}] :: done in {}min", super.getClass().getSimpleName(), this.makingTime/100);
     }
 }

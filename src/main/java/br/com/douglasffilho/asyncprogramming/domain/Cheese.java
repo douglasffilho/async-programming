@@ -2,6 +2,6 @@ package br.com.douglasffilho.asyncprogramming.domain;
 
 public class Cheese extends PizzaComponent {
     public Cheese() {
-        super(50L);
+        super(500L);
     }
 }

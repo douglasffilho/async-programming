@@ -10,12 +10,14 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.List;
+
 @SpringBootApplication
 public class AsyncProgrammingApplication implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(AsyncProgrammingApplication.class);
 
     @Autowired
-    private MakingPizzaProvider provider;
+    private List<MakingPizzaProvider> providers;
 
     public static void main(String[] args) {
         SpringApplication.run(AsyncProgrammingApplication.class, args);
@@ -23,15 +25,18 @@ public class AsyncProgrammingApplication implements CommandLineRunner {
 
     @Override
     public void run(final String... args) throws Exception {
-        var start = System.currentTimeMillis();
+        this.providers.forEach(provider -> {
+            log.info("Start making Pizza with: {}", provider.getClass().getSimpleName());
+            var start = System.currentTimeMillis();
 
-        final Pizza pizza = this.provider.makePizza();
+            final Pizza pizza = provider.makePizza();
 
-        var execTime = System.currentTimeMillis() - start;
+            var execTime = System.currentTimeMillis() - start;
 
-        pizza.getComponents().forEach(PizzaComponent::echo);
+            pizza.getComponents().forEach(PizzaComponent::echo);
 
-        log.info("Pizza done in {}min", execTime/10);
+            log.info("Pizza done in {}min", execTime/100);
+        });
 
         System.exit(0);
     }
